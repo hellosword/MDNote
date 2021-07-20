@@ -1,9 +1,8 @@
+# -*- coding: utf-8 -*-
 import pprint
 import re
 from LibSrc import xmindparser
 
-xmindparser.config["showTopicId"] = True
-xmindDict = xmindparser.xmind_to_dict(r"structure.xmind")
 
 pp = pprint.PrettyPrinter(indent=2)
 # pp.pprint(xmindDict)
@@ -100,10 +99,31 @@ class Outline(object):
 
 		pp.pprint(self.revPathDict)
 
-	def searchTitle()
+	def searchTitle(self):
+		pass
+
+class MDParser(object):
+
+	def __init__(self) -> None:
+		self.infoList = []
+		self.raw = []
+
+	def load(self, path):
+		with open(path, "r", encoding='utf-8') as f:
+			for item in f.readlines():
+				self.raw.append(item)
+				print(repr(item))
+
+
+xmindparser.config["showTopicId"] = True
+xmindDict = xmindparser.xmind_to_dict(r"E:\Qsync\工作内容\工作记录\structure.xmind")
 
 o = Outline()
 o.load(xmindDict)
+
+
+md = MDParser()
+md.load(r"E:\Qsync\工作内容\工作记录\2021.md")
 
 
 

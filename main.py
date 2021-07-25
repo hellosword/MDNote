@@ -14,14 +14,14 @@ class TopicTreeNode(object):
 	# NODE_TYPE_LEAF = 2
 	def __init__(self) -> None:
 		# super(TopicTreeNode, self).__init__()
-		# self.id = None
+		self.id = None
 		self.title = None
 		self.children = []
 		self.parent = None
 		self.path = []
 		
 	def loadRecursively(self, topicDict, parent=None):
-		# self.id = topicDict['id']
+		self.id = topicDict['id']
 		self.title = topicDict['title']
 		self.parent = parent
 		if parent:
@@ -48,7 +48,7 @@ class TopicTreeNode(object):
 		def visit(node):
 			if len(node.children) == 0:
 				# 访问到叶子节点
-				resultList.append(node.path)
+				resultList.append((node.path, node.id))
 
 		while p is not None:
 			nextChildIndex = indexList[d]
@@ -90,40 +90,108 @@ class Outline(object):
 
 		for rootNode in self.rootList:
 			pathList = rootNode.GenerateReversePath()
-			for path in pathList:
+			for nodeInfo in pathList:
+				path, nodeId = nodeInfo
 				path = list(reversed(path))
 				if len(path) > 1:
-					self.revPathDict.setdefault(path[0], []).append(path[1:])
+					self.revPathDict.setdefault(path[0], []).append((path[1:], nodeId))
 				else:
 					self.revPathDict.setdefault(path[0], [])
 
 		pp.pprint(self.revPathDict)
 
-	def searchTitle(self):
-		pass
+	def GetOutlinePath(self, topicSimplePath):
+		reverseSimplePath = list(reversed(topicSimplePath))
+		outlineList = self.revPathDict.get(reverseSimplePath[0], None)
+		if outlineList is None:
+			return False, "No path match-01!"
 
-class MDParser(object):
+		def checkPathMatch(fullPath):
+			i, j = 1, 0
+			while i < len(reverseSimplePath) and j < len(fullPath):
+				if reverseSimplePath[i] == fullPath[j]:
+					i += 1
+					j += 1
+				else:
+					j += 1
+			if i == len(reverseSimplePath):
+				return True
+			else:
+				return False
 
-	def __init__(self) -> None:
-		self.infoList = []
-		self.raw = []
+		if len(outlineList) == 1:
+			# 这里也要做一次检查
+			isMatch = checkPathMatch(outlineList[0][0])
+			if isMatch:
+				return True, outlineList[0]
+			else:
+				return False, "No path match-02!"
+		else:
+			validList = []
+			for item in outlineList:
+				fullPath, nodeID = item
+				isMatch = checkPathMatch(fullPath)
+				if isMatch:
+					# 说明找到了
+					validList.append(item)
+			if len(validList) > 1:
+				# raise RuntimeError()
+				return False, "Duplication Path Error!"
+			elif len(validList) == 1:
+				return True, validList[0]
+			else:
+				return False, "No path match-03!"
 
-	def load(self, path):
-		with open(path, "r", encoding='utf-8') as f:
-			for item in f.readlines():
-				self.raw.append(item)
-				print(repr(item))
 
 
+
+	def buildOutlineTree(self, topicList):
+		for item in topicList:
+			topicTitle = item['topicTitle']
+			topicSimplePath = [val.strip() for val in topicTitle.split('-')]
+			isMatched, exData = self.GetOutlinePath(topicSimplePath)
+			if not isMatched:
+				print(isMatched, exData)
+				print("\t", topicTitle)
+
+
+# class MDTreeNode(object):
+
+from mdParser import MDTree
+
+
+atHome = True
+
+if atHome == True:
+	xmindPath = r"E:\CloudDisk\Nas001\工作内容\工作记录\structure.xmind"
+	mdPath = r"E:\CloudDisk\Nas001\工作内容\工作记录\2021.md"
+else:
+	xmindPath = r"E:\Qsync\工作内容\工作记录\structure.xmind"
+	mdPath = r"E:\Qsync\工作内容\工作记录\2021.md"
+
+
+# 加载MD文件，匹配和解析header和list
+md = MDTree()
+md.load(mdPath)
+
+# 基于header和list结构，构建日志树
+jounral = md.GetJournal()
+# 基于日志树，平铺展开为话题列表
+topicList = jounral.GetTopicList()
+#pp.pprint(topicList)
+
+
+
+# 加载xmind文件
 xmindparser.config["showTopicId"] = True
-xmindDict = xmindparser.xmind_to_dict(r"E:\Qsync\工作内容\工作记录\structure.xmind")
+xmindDict = xmindparser.xmind_to_dict(xmindPath)
+pp.pprint(xmindDict)
 
+# 基于xmind文件，生成话题树
 o = Outline()
 o.load(xmindDict)
 
-
-md = MDParser()
-md.load(r"E:\Qsync\工作内容\工作记录\2021.md")
-
+# 将话题列表，排入xmind构架的Outline当中
+o.buildOutlineTree(topicList)
 
 

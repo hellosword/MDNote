@@ -44,7 +44,18 @@ class JTreeNode(object):
 		for item in self.children:
 			sstr += item.GetStr(depth+1)
 		return sstr
-		
+
+class OneThing(object):
+	def __init__(self, date, topicTitle, JTNode) -> None:
+		self.JTNode = JTNode
+		self.topicTitle = topicTitle
+		self.date = date
+
+	def __str__(self) -> str:
+		sstr = ""
+		sstr = self.JTNode.title
+		return sstr
+	
 
 class Journal(object):
 	def __init__(self) -> None:
@@ -101,18 +112,16 @@ class Journal(object):
 		else:
 			raise RuntimeError("Unsupported md type in journal: {}, {}, {}".format(mdType, level, content))
 
-	def GetTopicList(self):
+	def GetThingList(self):
 		'''
 		获取话题列表
 		'''
-		topicList = []
+		things = []
 		curDate = None
 		for dayRootNode in self.root.children:
 			curDate = dayRootNode.date
 			for topicNode in dayRootNode.children:
 				for subTopicNode in topicNode.children:
-					subInfo = subTopicNode.SerializeTopic()
-					subInfo["topicTitle"] = topicNode.title
-					subInfo["date"] = curDate
-					topicList.append(subInfo)
-		return topicList
+					oneThing = OneThing(curDate, topicNode.title, subTopicNode)
+					things.append(oneThing)
+		return things

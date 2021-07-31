@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from LibSrc.xmindparser.xreader import image_of
 import pprint
 import re
 from sys import prefix
@@ -23,24 +24,28 @@ class TopicTreeNode(object):
 		self.path = []
 
 		self.thingList = []
+		self.thingRecurCnt = None
+
+		self.labels = ""
 	
 
 	def BuildTree(self, topicDict, parent=None):
-		self.InitNode(topicDict['id'], topicDict['title'], parent)		
+		self.InitNode(topicDict, parent)		
 		if 'topics' in topicDict:
 			self.BuildSubTree(topicDict['topics'])
 
 	def BuildSubTree(self, subList):
 		for subTopic in subList:
-			newNode = self.AddChild(subTopic["id"], subTopic['title'])
+			newNode = self.AddChild(subTopic)
 			if 'topics' in subTopic:
 				newNode.BuildSubTree(subTopic['topics'])
 
-	def AddChild(self, childId, title):
+	def AddChild(self, subTopic):
+		childId = subTopic["id"]
 		if self.HasChild(childId):
 			raise RuntimeError("Duplicated Node Error: add child.")
 		newNode = TopicTreeNode()
-		newNode.InitNode(childId, title, self)
+		newNode.InitNode(subTopic, self)
 		
 		self.children.append(newNode)
 		self.childrenIdToIndex[childId] = len(self.children) - 1
@@ -56,15 +61,19 @@ class TopicTreeNode(object):
 	def HasChild(self, childId):
 		return self.GetChildByID(childId) is not None
 
-	def InitNode(self, nodeId, title, parent=None):
-		self.id = nodeId
-		self.title = title
+	def InitNode(self, infoDict, parent=None):
+		# self.id = infoDict["id"]
+		# self.title = infoDict["title"]
+		for key in infoDict.keys():
+			if hasattr(self, key):
+				setattr(self, key, infoDict[key])
+
 		self.parent = parent
 		if parent:
 			self.path.extend(parent.path)
 		self.path.append((self.id, self.title))
 
-	def InsertPath(self, fullPathList, oneThing):
+	def InsertPath(self, fullPathList, oneThing, autoNewPath=False):
 		if len(fullPathList) == 0:
 			self.thingList.append(oneThing)
 		else:
@@ -73,10 +82,34 @@ class TopicTreeNode(object):
 
 			childNode = self.GetChildByID(childId)
 			if childNode is None:
-				childNode = self.AddChild(childId, childTitle)
+				if autoNewPath:
+					childNode = self.AddChild(childId, childTitle)
+				else:
+					raise RuntimeError("Path Error: ", fullPathList)
 			
 			childNode.InsertPath(restPath, oneThing)
 	
+	def ClearAllThings(self):
+		self.thingList = []
+		self.thingRecurCnt = None
+		for child in self.children:
+			child.ClearAllThings()
+
+	def CountThings(self, isRecursive=True):
+		if isRecursive and self.thingRecurCnt is not None:
+			return self.thingRecurCnt
+
+		n = len(self.thingList) 
+		if isRecursive:
+			# from functools import reduce
+			# n += reduce(lambda a, b: a + b, [len(child.thingList) for child in self.children])
+			n += sum([child.CountThings() for child in self.children])
+
+		# 好像并不会重复计算，这个缓存应该没什么卵用
+		self.thingRecurCnt = n
+
+		return n
+
 	def GetStr(self, prefix=""):
 		
 		prefix =  prefix + "    "
@@ -90,6 +123,53 @@ class TopicTreeNode(object):
 		for item in self.children:
 			sstr += item.GetStr(prefix)
 		return sstr
+
+	def BuildStr(self):
+		if self.CountThings(isRecursive=True) == 0:
+			# 没有做事情的分支，啥也不显示
+			return ""
+
+		level = len(self.path)
+		
+		prefix =  "    " * level
+		sstr = ""
+		n = self.CountThings()
+		sstr += prefix + "{}({})\n".format(self.title, n)
+		# if self.labels:
+		# 	print(self.labels)
+		if level == 2 or "flatten" in self.labels:
+			itemList = self.BuildThingList([])
+			# itemList = sorted(itemList, key=lambda item: item[1])
+			lienList = ["{}.".format(index+1) + ("" if len(item[0]) == 0 else "【{}】".format("/".join(item[0]))) + "{}".format(item[1]) for index, item in enumerate(itemList)]
+			for line in lienList:
+				if not line.endswith("。"):
+					line += "。"
+				sstr += prefix + "    " + line + "\n"
+		else:
+			for item in self.children:
+				sstr += item.BuildStr()
+		return sstr
+
+	def BuildThingList(self, prefix):
+		result = []
+		newprefix = []
+		newprefix.extend(prefix)
+		# newprefix.append(self.title)
+
+		# thingList = sorted(, reverse=True, key=lambda item: item.date)
+		if self.title == "预警节点":
+			print(11)
+		for oneThing in self.thingList:
+			result.append((
+				newprefix, oneThing
+			))
+		for child in self.children:
+			t = [] + prefix
+			t.append(child.title)
+			result.extend(child.BuildThingList(t))
+
+		return result
+
 
 	def GenerateReversePath(self):
 		"""[summary]
@@ -230,13 +310,14 @@ class Outline(object):
 				print(oneThing.date, oneThing.topicTitle, exData)
 		else:
 			# 全都match上了，我们打印一下结果
-			newTreeRoot = TopicTreeNode()
+			newTreeRoot = self.rootNode
+			newTreeRoot.ClearAllThings()
 			for item in matchedList:
 				oneThing, fullPath = item
 				print(fullPath, oneThing)
-				newTreeRoot.InsertPath(fullPath, oneThing)
+				newTreeRoot.InsertPath(fullPath[1:], oneThing)
 
-			print(newTreeRoot.GetStr())
+			print(newTreeRoot.BuildStr())
 			
 
 # class MDTreeNode(object):

@@ -98,5 +98,7 @@ class Outline(object):
 				print(fullPath, oneThing)
 				newTreeRoot.InsertPath(fullPath[1:], oneThing)
 
-			print(newTreeRoot.BuildStr())
+			report_str = newTreeRoot.BuildStr()
+			print(report_str)
+			return report_str
 			

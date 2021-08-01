@@ -11,6 +11,7 @@ class CmdParser(object):
 		self.end = None
 		self.xmind = None
 		self.markdown = None
+		self.output = None
 
 	def get_date(self, dateStr):
 		dateStrArr = dateStr.strip().split(".")
@@ -20,7 +21,7 @@ class CmdParser(object):
 		self.func = func
 
 		try:
-			opts, args = getopt.getopt(args, "s:e:x:m:", ["start=","end=", "xmind=", "markdown="])
+			opts, args = getopt.getopt(args, "s:e:x:m:o:", ["start=","end=", "xmind=", "markdown=", "output="])
 		except getopt.GetoptError as err:
 			print(str(err))
 			sys.exit(2)
@@ -34,6 +35,10 @@ class CmdParser(object):
 				self.xmind = a
 			elif o in ("--markdown", "-m"):
 				self.markdown = a
+			elif o in ("--output", "-o"):
+				self.output = a
+
+			
 
 
 

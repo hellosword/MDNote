@@ -8,11 +8,12 @@ import sys
 from md_parser import MDTree
 from cmd_decorator import usercmd
 from outline import Outline
-
+import time
+import os
 pp = pprint.PrettyPrinter(indent=2)
 
 
-@usercmd("generate", usage="generate monthly report")
+@usercmd("gen", usage="generate monthly report")
 def generate001(cmdObj):
 	xmindPath = cmdObj.xmind
 	mdPath = cmdObj.markdown
@@ -45,4 +46,17 @@ def generate001(cmdObj):
 	o.load(xmindDict)
 
 	# 将话题列表，排入xmind构架的Outline当中
-	o.buildOutlineTree(thingList)
+	report_str = o.buildOutlineTree(thingList)
+	
+	if report_str is not None:
+		timeSuffix = time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time()))
+		fileName = os.path.join("report_{}.txt".format(timeSuffix))
+		if cmdObj.output is not None:
+			if os.path.exists(cmdObj.output):
+				fileName = os.path.join(cmdObj.output, fileName)
+			else:
+				raise RuntimeError("Output path not exists! {}".format(cmdObj.output))
+		
+
+		with open(fileName, "w", encoding="utf-8") as f:
+			f.write(report_str)

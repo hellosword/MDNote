@@ -130,7 +130,7 @@ class TopicTreeNode(object):
 		if level == 2 or "flatten" in self.labels:
 			itemList = self.BuildThingList([])
 			# itemList = sorted(itemList, key=lambda item: item[1])
-			lienList = ["{}.".format(index+1) + ("" if len(item[0]) == 0 else "【{}】".format("/".join(item[0]))) + "{}".format(item[1]) for index, item in enumerate(itemList)]
+			lienList = ["{:>2}.".format(index+1) + ("" if len(item[0]) == 0 else "【{}】".format("/".join(item[0]))) + "{}".format(item[1]) for index, item in enumerate(itemList)]
 			for line in lienList:
 				if not line.endswith("。"):
 					line += "。"

@@ -45,9 +45,9 @@ line = '''
 
 ### 7月19日
 
-- 多语言翻译平台 - 文档和沟通 - G108沟通
-  - 0716回复TechCall相关问题
-  - 补充技术文档，关于DevDB和StringDB的关系
+- AAA - BBB - CCC
+  - 0716Something
+  - 补充技术文档
 '''
 # print(line)
 

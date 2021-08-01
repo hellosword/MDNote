@@ -16,7 +16,12 @@
 			"type": "python",
 			"request": "launch",
 			"program": "main.py",
-			"console": "integratedTerminal"
+			"console": "integratedTerminal",
+			"args": [
+				"generate",
+				"--xmind=E:/CloudDisk/Nas001/工作内容/工作记录/structure.xmind",
+				"--markdown=E:/CloudDisk/Nas001/工作内容/工作记录/2021.md",
+			],
 		}
 	]
 }

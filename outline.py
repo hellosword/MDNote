@@ -69,10 +69,12 @@ class Outline(object):
 
 
 
-	def buildOutlineTree(self, thingList):
+	def buildOutlineTree(self, thingList, start, end):
 		notMatchedList = []
 		matchedList = []
 		for oneThing in thingList:
+			if not oneThing.checkTime(start, end):
+				continue				
 			topicTitle = oneThing.topicTitle
 			topicSimplePath = [val.strip() for val in topicTitle.split('-')]
 			isMatched, exData = self.GetOutlinePath(topicSimplePath)

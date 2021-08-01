@@ -46,7 +46,7 @@ def generate001(cmdObj):
 	o.load(xmindDict)
 
 	# 将话题列表，排入xmind构架的Outline当中
-	report_str = o.buildOutlineTree(thingList)
+	report_str = o.buildOutlineTree(thingList, cmdObj.start, cmdObj.end)
 	
 	if report_str is not None:
 		timeSuffix = time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time()))

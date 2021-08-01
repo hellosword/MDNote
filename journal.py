@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from LibSrc.xmindparser import xreader
 from common.singleton import Singleton
 import re
 import uuid
@@ -56,6 +57,32 @@ class OneThing(object):
 		sstr = self.JTNode.title
 		return sstr
 	
+	def _compare_tuple(self, a, b):
+		n = min(len(a), len(b))
+		for i in range(n):
+			if a[i] > b[i]:
+				return 1
+			elif a[i] < b[i]:
+				return -1
+		return len(a) - len(b)
+		
+	def checkTime(self, start, end):
+		"""Determine whether the time is within the interval [a, b)
+
+		Args:
+			start ([type]): [description]
+			end ([type]): [description]
+
+		Returns:
+			[type]: [description]
+		"""
+		if start is not None:
+			if self._compare_tuple(self.date, start) < 0:
+				return False
+		if end is not None:
+			if self._compare_tuple(self.date, end) >= 0:
+				return False
+		return True
 
 class Journal(object):
 	def __init__(self) -> None:

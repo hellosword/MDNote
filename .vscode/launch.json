@@ -21,7 +21,9 @@
 				"gen",
 				"--xmind=E:/CloudDisk/Nas001/工作内容/工作记录/structure.xmind",
 				"--markdown=E:/CloudDisk/Nas001/工作内容/工作记录/2021.md",
-				"--output=E:/CloudDisk/Nas001/工作内容/工作记录/"
+				"--output=E:/CloudDisk/Nas001/工作内容/工作记录/",
+				"--start=07.16",
+				"--end=08.01",
 			],
 		}
 	]

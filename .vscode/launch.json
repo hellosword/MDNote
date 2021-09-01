@@ -25,6 +25,18 @@
 				"--start=07.16",
 				"--end=08.01",
 			],
+		},
+		{
+			"name": "Python: gen2",
+			"type": "python",
+			"request": "launch",
+			"program": "main.py",
+			"console": "integratedTerminal",
+			"args": [
+				"gen2",
+				"--xmind=D:/CloudDisk/Qsync/工作内容/工作记录/2021-08.xmind",
+				"--output=D:/CloudDisk/Qsync/工作内容/工作记录/",
+			],
 		}
 	]
 }

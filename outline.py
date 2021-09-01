@@ -24,6 +24,11 @@ class Outline(object):
 		# print("\n -----------------------revPathDict------------------------")
 		# pp.pprint(self.revPathDict)
 
+	def BuildTopicThingList(self):
+		report_str = self.rootNode.BuildTopicThingList()
+		print(report_str)
+		return report_str
+
 	def GetOutlinePath(self, topicSimplePath):
 		"""[summary]
 
@@ -65,9 +70,6 @@ class Outline(object):
 			return True, validList[0]
 		else:
 			return False, "No path match-03!"
-
-
-
 
 	def buildOutlineTree(self, thingList, start, end):
 		notMatchedList = []

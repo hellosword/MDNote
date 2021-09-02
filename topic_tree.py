@@ -207,5 +207,78 @@ class TopicTreeNode(object):
 		
 		return resultList
 
+	##########################################
+	# 新版的一些处理
+
+	def BuildTopicThingList(self):
+		if self.CountThings2(isRecursive=True) == 0:
+			# 没有做事情的分支，啥也不显示
+			return ""
+
+		level = len(self.path)
+		
+		prefix =  "    " * level
+		sstr = ""
+		n = self.CountThings2()
+		sstr += prefix + "{}({})\n".format(self.title, n)
+		# if self.labels:
+		# 	print(self.labels)
+		if level == 2 or "flatten" in self.labels:
+			itemList = self.BuildThingList2([], hasSelfTitle=False)
+			# itemList = sorted(itemList, key=lambda item: item[1])
+			lienList = ["{:>2}.".format(index+1) + ("" if len(item[0]) == 0 else "【{}】".format("/".join(item[0]))) + "{}".format(item[1]) for index, item in enumerate(itemList)]
+			for line in lienList:
+				if not line.endswith("。"):
+					line += "。"
+				sstr += prefix + "    " + line + "\n"
+		else:
+			for item in self.children:
+				sstr += item.BuildTopicThingList()
+		return sstr
+
+	def BuildThingList2(self, prefix, hasSelfTitle=True):
+		result = []
+		# newprefix = []
+		# newprefix.extend(prefix)
+		# newprefix.append(self.title)
+
+		# thingList = sorted(, reverse=True, key=lambda item: item.date)
+		isThingNode = self.IsThingNode()
+		if isThingNode:
+			startIndex = self.title.find("-")
+			title = self.title[startIndex+1:]
+			result.append((
+				prefix, title
+			))
+		else:
+			t = [] + prefix
+			if hasSelfTitle:
+				t.append(self.title)
+			for child in self.children:
+				result.extend(child.BuildThingList2(t))
+
+		return result
+
+	def IsThingNode(self):
+		return self.title.strip().startswith("-")
+
+	def CountThings2(self, isRecursive=True):
+		if isRecursive and self.thingRecurCnt is not None:
+			return self.thingRecurCnt
+
+		n = 0
+
+		isThingNode = self.IsThingNode()
+		if isThingNode:
+			n = 1
+		elif isRecursive:
+			# from functools import reduce
+			# n += reduce(lambda a, b: a + b, [len(child.thingList) for child in self.children])
+			n += sum([child.CountThings2() for child in self.children])
+
+		# 好像并不会重复计算，这个缓存应该没什么卵用
+		self.thingRecurCnt = n
+
+		return n
 		
 

@@ -34,8 +34,8 @@
 			"console": "integratedTerminal",
 			"args": [
 				"gen2",
-				"--xmind=D:/CloudDisk/Qsync/工作内容/工作记录/2021-08.xmind",
-				"--output=D:/CloudDisk/Qsync/工作内容/工作记录/",
+				"--xmind=E:/Qsync/工作内容/工作记录/2021-08.xmind",
+				"--output=E:/Qsync/工作内容/工作记录/",
 			],
 		}
 	]

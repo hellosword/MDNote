@@ -1,4 +1,29 @@
 # -*- coding: utf-8 -*-
+def int_to_Roman(num, needSub=True):
+	val = [
+		1000, 900, 500, 400,
+		100, 90, 50, 40,
+		10, 9, 5, 4,
+		1
+		]
+	syb = [
+		"M", "CM", "D", "CD",
+		"C", "XC", "L", "XL",
+		"X", "IX", "V", "IV",
+		"I"
+		]
+	roman_num = ''
+	i = 0
+	while  num > 0:
+		for _ in range(num // val[i]):
+			roman_num += syb[i]
+			num -= val[i]
+		i += 1
+	return roman_num.lower() if needSub else roman_num
+
+def int_to_alphabat(index):
+	return chr(ord('`')+index)
+# LETTERS = {letter: str(index) for index, letter in enumerate(ascii_lowercase, start=1)} 
 
 class TopicTreeNode(object):
 	# NODE_TYPE_ROOT = 0
@@ -219,17 +244,50 @@ class TopicTreeNode(object):
 		
 		prefix =  "    " * level
 		sstr = ""
-		n = self.CountThings2()
-		sstr += prefix + "{}({})\n".format(self.title, n)
+		# n = self.CountThings2()
+		sstr += prefix + "{}\n".format(self.title)
 		# if self.labels:
 		# 	print(self.labels)
 		if level == 2 or "flatten" in self.labels:
 			itemList = self.BuildThingList2([], hasSelfTitle=False)
-			# itemList = sorted(itemList, key=lambda item: item[1])
-			lienList = ["{:>2}.".format(index+1) + ("" if len(item[0]) == 0 else "【{}】".format("/".join(item[0]))) + "{}".format(item[1]) for index, item in enumerate(itemList)]
+
+			lastPack = []
+			lastPath = None
+			lienList = []
+			def buildPack(index):
+				if lastPath is not None:	
+					if len(lastPack) <= 2:
+						# 只有一条则只占领一行
+						for line in lastPack:
+							newStr = "{:>2}.".format(index) + lastPath + "{}".format(line)
+							index += 1
+							lienList.append(newStr)
+					else:
+						newStr = "{:>2}.".format(index) + lastPath + "："
+						index += 1
+						lienList.append(newStr)
+						subIndex = 1
+						for subline in lastPack:
+							newStr = "        {}.{}".format(int_to_alphabat(subIndex), subline)
+							lienList.append(newStr)
+							subIndex += 1
+				return index
+			index = 1
+			for item in itemList:
+				curPath = "" if len(item[0]) == 0 else "【{}】".format("/".join(item[0]))
+				curline = "{}".format(item[1])
+				if not curline.endswith("。"):
+					curline += "。"
+				if curPath == lastPath:
+					lastPack.append(curline)
+				else:
+					index = buildPack(index)
+					lastPath = curPath
+					lastPack = [curline]
+			buildPack(index)
+
+			# lienList = ["{:>2}.".format(index+1) + ("" if len(item[0]) == 0 else "【{}】".format("/".join(item[0]))) + "{}".format(item[1]) for index, item in enumerate(itemList)]
 			for line in lienList:
-				if not line.endswith("。"):
-					line += "。"
 				sstr += prefix + "    " + line + "\n"
 		else:
 			for item in self.children:
